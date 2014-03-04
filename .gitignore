@@ -7,3 +7,5 @@ pom.xml.asc
 *.class
 /.lein-*
 /.nrepl-port
+/vendor/datomic-free-0.9.4572/log/*
+/vendor/datomic-free-0.9.4572/data/*
