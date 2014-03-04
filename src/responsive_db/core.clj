@@ -23,21 +23,28 @@
 (defn id-of-created [transaction]
   (first (vals (:tempids transaction))))
 
+(def uri "datomic:free://localhost:4334/responsive-db")
+
+(defn reader-repl []
+  (let [conn  (d/connect uri)
+        queue (d/tx-report-queue conn)]
+    (loop [tx (.take queue)]
+      (let [id (id-of-created tx)
+            e  (d/entity (:db-after tx) id)]
+        (println (:thing/name e))
+        (recur (.take queue)))) ))
+
+(defn writer-repl []
+  (let [conn (d/connect uri)]
+    (create conn {:thing/name "Logan"})
+    (create conn {:thing/name "Bob"})))
+
 (comment
- 
-  (def conn (seed "datomic:free://localhost:4334/responsive-db"))
+  
+  (seed uri)
 
-  (def queue (d/tx-report-queue conn))
+  (reader-repl)
 
-  (loop [tx (.take queue)]
-    (let [id (id-of-created tx)
-          e  (d/entity (:db-after tx) id)]
-      (println (:thing/name e))
-      (recur (.take queue))))
-
-  (create conn {:thing/name "Logan"})
-
-  (create conn {:thing/name "Bob"})
-
+  (writer-repl)
+  
   )
-
