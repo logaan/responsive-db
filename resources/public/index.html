@@ -1,0 +1,12 @@
+<script>
+  ws = new WebSocket("ws://localhost:9090/ws");
+
+  ws.onmessage = function(m) {
+    console.log("message received:", m);
+  };
+
+  ws.onopen = function() {
+    ws.send("foo");
+  }
+</script>
+
