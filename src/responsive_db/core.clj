@@ -1,6 +1,7 @@
 (ns responsive-db.core
   (:require [datomic.api :refer [db q] :as d]
-            [clojure.pprint :refer [pprint]]))
+            [clojure.pprint :refer [pprint]]
+            [responsive-db.web :refer [publish websockets]]))
 
 (def schema
   [{:db/id                  #db/id[:db.part/db]
@@ -29,10 +30,11 @@
   (let [conn  (d/connect uri)
         queue (d/tx-report-queue conn)]
     (loop [tx (.take queue)]
-      (let [id (id-of-created tx)
-            e  (d/entity (:db-after tx) id)]
-        (println (:thing/name e))
-        (recur (.take queue)))) ))
+      (let [id    (id-of-created tx)
+            e     (d/entity (:db-after tx) id)
+            sub-e (select-keys e [:thing/name])]
+        (publish websockets (str sub-e))
+        (recur (.take queue))))))
 
 (defn writer-repl []
   (let [conn (d/connect uri)]

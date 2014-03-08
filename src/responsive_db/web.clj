@@ -7,6 +7,10 @@
 (def websockets
   (atom (hash-set)))
 
+(defn publish [websockets message]
+  (doseq [channel @websockets]
+    (send! channel message)))
+
 (defn websocket-handler [request]
   (with-channel request channel
     (swap! websockets conj channel)
