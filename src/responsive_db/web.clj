@@ -4,10 +4,18 @@
             [compojure.route :as route]
             [clojure.java.io :as io]))
 
+(def websockets
+  (atom (hash-set)))
+
 (defn websocket-handler [request]
   (with-channel request channel
-    (on-close   channel (fn [status] (println "channel closed: " status)))
+    (swap! websockets conj channel)
+    (on-close   channel (fn [status]
+                          (swap! websockets disj channel)
+                          (println @websockets)
+                          (println "channel closed: " status)))
     (on-receive channel (fn [data]
+                          (println @websockets)
                           (println data)
                           (send! channel data)))))
 
